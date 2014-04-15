@@ -1,0 +1,16 @@
+<div id="header" class="clearfix">
+  <div id="date-range-selector" data-controller="App.Controller.Chart">
+    <label>Date Range:</label>
+    <select data-on-change="updateDateSelector">
+      <option value="loadHourly" {{- if d.activeDateRange === 'loadHourly' }}selected{{/}}>Last 3 hours</option>
+      <option value="loadDaily" {{- if d.activeDateRange === 'loadDaily' }}selected{{/}}>Last 12 hours</option>
+      <option value="loadWeekly" {{- if d.activeDateRange === 'loadWeekly' }}selected{{/}}>Last 7 days</option>
+      <option value="loadMonthly" {{- if d.activeDateRange === 'loadMonthly' }}selected{{/}}>Last 30 days</option>
+    </select>
+  </div>
+</div>
+<div id="grid-layout">
+  {{- for d.instances }}
+    {{- render instanceSummary }}
+  {{- end }}
+</div>

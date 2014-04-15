@@ -1,0 +1,71 @@
+#!/bin/bash
+
+# Deploy the Overcast Charts application to an existing Ubuntu instance.
+
+###############################################################################
+
+# Instructions:
+
+# 1. Install Overcast:
+#
+#    npm -g install overcast
+#
+# 2. Add your Ubuntu instance to your Overcast configuration:
+#
+#    overcast cluster create charts
+#    overcast instance import charts.001 --cluster charts --ip 192.168.100.123 \
+#      --ssh-key $HOME/.ssh/id_rsa --ssh-port 22 --user root
+#
+# 3. Run this script from the terminal:
+#
+#    git clone git@github.com:andrewchilds/overcast-charts.git
+#    overcast-charts/recipes/deploy-to-existing-ubuntu
+#
+# 4. Wait for the script to finish. Write down the generated password for your application.
+#
+# 5. Go to your assigned IP address and enter "overcast" and the generated password to log in.
+
+###############################################################################
+
+# Configuration:
+
+instance="charts.001"
+username="appuser"
+sshPort="50022"
+
+# Local Overcast configuration to be pushed to the new instance.
+overcastConfigPath="$HOME/.overcast"
+
+###############################################################################
+
+# You shouldn't have to edit anything below.
+
+dirName=$(dirname "$0")
+
+echo "Install dependencies..."
+overcast run $instance harden_ssh
+overcast run $instance install/core install/redis install/nodejs
+overcast run $instance "npm -g install grunt-cli bower forever overcast"
+
+echo "Waiting 1 minute for server to reboot..."
+overcast run $instance reboot
+sleep 60
+
+echo "Change SSH port to $sshPort, configure iptables..."
+overcast expose $instance 22 $sshPort
+overcast port $instance $sshPort
+overcast expose $instance 3000 $sshPort
+
+echo "Switching to user \"$username\" instead of root..."
+overcast run $instance add_user --env "username=$username"
+overcast instance update $instance --user $username
+
+echo "Pushing your overcast config ($overcastConfigPath) to the server..."
+overcast push $instance $overcastConfigPath .overcast
+
+echo "Installing application..."
+overcast run $instance $dirName/bin/install
+overcast run $instance $dirName/bin/update
+
+echo "Done!"
+echo "Your new Overcast Charts instance is ready to go at http://`overcast instance get $instance ip`. Enjoy!"

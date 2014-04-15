@@ -1,0 +1,49 @@
+#!/bin/bash
+
+# No need to run this file yourself - this is run on the instance by Overcast.
+
+# Install Overcast Charts
+# Tested on Ubuntu 12.04
+
+# set -x
+
+appPath="/home/appuser/overcast-charts"
+logPath="$appPath/logs"
+
+echo "Setting all keys to /home/appuser/.overcast/keys/overcast.key..."
+echo "If any of your instances use a different key, you'll need to fix that manually."
+
+sed -i "s/\"ssh_key\": \".*\"/\"ssh_key\": \"\/home\/appuser\/.overcast\/keys\/overcast.key\"/g" $HOME/.overcast/clusters.json
+
+echo "Resetting $HOME/.overcast/variables.json..."
+
+cp $HOME/.overcast/example.variables.json $HOME/.overcast/variables.json
+
+echo "Cloning repo..."
+
+git clone git@github.com:andrewchilds/overcast-charts.git $appPath
+mkdir -p $logPath
+
+echo "Installing scheduled tasks..."
+
+snapshot="*/5 * * * * NODE_ENV=production $appPath/bin/snapshot >$logPath/snapshot 2>&1"
+weekly="2 * * * * NODE_ENV=production $appPath/bin/weekly >$logPath/weekly 2>&1"
+monthly="2 */4 * * * NODE_ENV=production $appPath/bin/monthly >$logPath/monthly 2>&1"
+reboot="@reboot NODE_ENV=production forever start --append -l $logPath/forever.log -o $logPath/stdout.log -e $logPath/stderr.log $appPath/app/server/app.js"
+
+(crontab -l; echo "$snapshot") | crontab -
+(crontab -l; echo "$weekly") | crontab -
+(crontab -l; echo "$monthly") | crontab -
+(crontab -l; echo "$reboot") | crontab -
+
+crontab -l > crontab.backup
+
+echo "Initializing production config..."
+
+cp $appPath/app/config/development.json $appPath/app/config/production.json
+newPassword=`cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 20 | head -n 1`
+sed -i "s/\"BASICAUTH_PASSWORD\": \".*\"/\"BASICAUTH_PASSWORD\": \"$newPassword\"/g" $appPath/app/config/production.json
+
+echo "----------------------------------------"
+echo "NEW PASSWORD: $newPassword"
+echo "----------------------------------------"

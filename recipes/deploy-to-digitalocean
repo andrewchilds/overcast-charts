@@ -1,0 +1,87 @@
+#!/bin/bash
+
+# Deploy the Overcast Charts application on DigitalOcean.
+# This script takes about 5 minutes to run.
+
+###############################################################################
+
+# Instructions:
+
+# 1. Install Overcast:
+#
+#    npm -g install overcast
+#
+# 2. Add your DigitalOcean API credentials to $HOME/.overcast/variables.json:
+#
+#    {
+#      "DIGITALOCEAN_CLIENT_ID": "YOUR_CLIENT_ID",
+#      "DIGITALOCEAN_API_KEY": "YOUR_API_KEY"
+#    }
+#
+# 3. Run this script from the terminal:
+#
+#    git clone git@github.com:andrewchilds/overcast-charts.git
+#    overcast-charts/recipes/deploy-to-digitalocean
+#
+# 4. Wait for the script to finish. Write down the generated password for your application.
+#
+# 5. Go to your assigned IP address and enter "overcast" and the generated password to log in.
+
+###############################################################################
+
+# Configuration:
+
+cluster="charts"
+instance="charts.001"
+username="appuser"
+sshPort="50022"
+
+# Local Overcast configuration to be pushed to the new instance.
+overcastConfigPath="$HOME/.overcast"
+
+# List droplet sizes with `overcast digitalocean sizes`
+sizeSlug="512mb"
+
+# List droplet regions with `overcast digitalocean regions`
+regionSlug="nyc2"
+
+# List droplet regions with `overcast digitalocean images`
+imageSlug="ubuntu-12-04-x64"
+
+###############################################################################
+
+# You shouldn't have to edit anything below.
+
+dirName=$(dirname "$0")
+
+echo "Creating cluster \"$cluster\" if it does not already exist..."
+overcast cluster create $cluster
+
+echo "Creating instance \"$instance\" on DigitalOcean..."
+overcast digitalocean create $instance --cluster $cluster --size-slug $sizeSlug \
+  --region-slug $regionSlug --image-slug $imageSlug
+
+echo "Install dependencies..."
+overcast run $instance harden_ssh
+overcast run $instance install/core install/redis install/nodejs
+overcast run $instance "npm -g install grunt-cli bower forever overcast"
+overcast digitalocean reboot $instance
+
+echo "Change SSH port to $sshPort, configure iptables..."
+overcast expose $instance 22 $sshPort
+overcast port $instance $sshPort
+overcast expose $instance 3000 $sshPort
+
+echo "Switching to user \"$username\" instead of root..."
+overcast run $instance add_user --env "username=$username"
+overcast instance update $instance --user $username
+
+echo "Pushing your overcast config ($overcastConfigPath) to the server..."
+overcast push $instance $overcastConfigPath .overcast
+
+echo "Installing application..."
+overcast run $instance $dirName/bin/install
+overcast run $instance $dirName/bin/update
+
+echo "Done!"
+echo "Your new Overcast Charts instance is ready to go at http://`overcast instance get $instance ip`. Enjoy!"

@@ -1,0 +1,13 @@
+#!/bin/bash
+
+# Upgrades an Overcast Charts instance to the latest version.
+# This script takes around 30 seconds to run.
+
+instance="charts.001"
+
+# You shouldn't have to edit anything below.
+
+dirName=$(dirname "$0")
+
+echo "Updating application..."
+overcast run $instance $dirName/bin/update

@@ -1,0 +1,46 @@
+<div class="instance" data-on-click="view" data-name="{{d.name}}" data-controller="App.Controller.Chart">
+  <h2><span class="fa fa-cloud"></span> {{d.name}}</h2>
+  <div class="tabs clearfix">
+    <a href="#" class="active" data-on-click="viewTab" data-tab=".charts-tab">Charts</a>
+    <a href="#" data-on-click="viewTab" data-tab=".process-tab">Processes</a>
+  </div>
+  <div class="charts-tab">
+    <div class="chart">
+      <div class="header">
+        <h3><span class="fa fa-tachometer"></span> CPU</h3>
+      </div>
+      <svg class="cpu"></svg>
+    </div>
+    <div class="chart">
+      <div class="header">
+        <h3><span class="fa fa-bolt"></span> Memory</h3>
+      </div>
+      <svg class="ram"></svg>
+    </div>
+    <div class="chart">
+      <div class="header">
+        <h3><span class="fa fa-hdd-o"></span> Disk</h3>
+      </div>
+      <svg class="disk"></svg>
+    </div>
+    <div class="chart">
+      <div class="header">
+        <h3><span class="fa fa-hdd-o"></span> IO</h3>
+      </div>
+      <svg class="io"></svg>
+    </div>
+    <div class="chart">
+      <div class="header">
+        <h3><span class="fa fa-signal"></span> Network</h3>
+      </div>
+      <svg class="network"></svg>
+    </div>
+    <div class="chart">
+      <div class="header">
+        <h3><span class="fa fa-signal"></span> TCP</h3>
+      </div>
+      <svg class="connections"></svg>
+    </div>
+  </div>
+  <div class="process-tab hidden"></div>
+</div>

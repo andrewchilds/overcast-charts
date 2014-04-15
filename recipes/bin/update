@@ -1,0 +1,26 @@
+#!/bin/bash
+
+# No need to run this file yourself - this is run on the instance by Overcast.
+
+# Update Overcast Charts
+# Tested on Ubuntu 12.04
+
+# set -x
+
+appPath="/home/appuser/overcast-charts"
+logPath="$appPath/logs"
+appBinary="$appPath/app/server/app.js"
+
+cd $appPath
+
+git fetch && git rebase origin/master
+bower --allow-root install
+npm install
+grunt
+
+forever stop $appBinary
+
+NODE_ENV=production forever start --append \
+  -l $logPath/forever.log \
+  -o $logPath/stdout.log \
+  -e $logPath/stderr.log $appBinary

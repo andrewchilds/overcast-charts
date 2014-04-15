@@ -1,0 +1,4 @@
+#!/usr/bin/env node
+
+var jobs = require('../app/server/modules/jobs.js');
+jobs.monthly();

@@ -1,0 +1,12 @@
+app/config/production.json
+public/bower
+public/bundled
+logs
+test/log/*.png
+test/log/*.html
+.DS_Store
+.idea
+fingerprint
+dump.rdb
+npm-debug.log
+libpeerconnection.log

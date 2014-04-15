@@ -1,0 +1,16 @@
+{
+  "name": "overcast-charts",
+  "version": "0.1.1",
+  "main": "app/server/app.js",
+  "license": "MIT",
+  "dependencies": {
+    "collectionize": "0.2.0",
+    "d3": "3.3.13",
+    "fastbinder": "0.2.1",
+    "font-awesome": "4.0.3",
+    "jquery": "1.11.0",
+    "less-elements": "*",
+    "normalize-css": "3.0.0",
+    "nvd3": "1.1.15-beta"
+  }
+}

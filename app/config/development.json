@@ -1,0 +1,8 @@
+{
+  "PORT": 3000,
+  "BASICAUTH_USER": "overcast",
+  "BASICAUTH_PASSWORD": "overcast",
+  "REDIS_HOSTNAME": "127.0.0.1",
+  "REDIS_PORT": 6379,
+  "REDIS_PASSWORD": ""
+}
