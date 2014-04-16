@@ -6,7 +6,7 @@
   "dependencies": {
     "collectionize": "0.2.0",
     "d3": "3.3.13",
-    "fastbinder": "0.2.1",
+    "fastbinder": "0.2.2",
     "font-awesome": "4.0.3",
     "jquery": "1.11.0",
     "less-elements": "*",
