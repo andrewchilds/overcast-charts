@@ -29,7 +29,7 @@
 
 # Configuration:
 
-instance="charts.001"
+instance=${1:-"charts.001"}
 username="appuser"
 sshPort="50022"
 
@@ -47,9 +47,14 @@ overcast run $instance harden_ssh
 overcast run $instance install/core install/redis install/nodejs
 overcast run $instance "npm -g install grunt-cli bower forever overcast"
 
-echo "Waiting 1 minute for server to reboot..."
-overcast run $instance reboot
-sleep 60
+if [ -n "`overcast instance get $instance digitalocean`" ]; then
+  overcast digitalocean reboot $instance
+else
+  echo "Rebooting server..."
+  overcast run $instance reboot
+  echo "Waiting 1 minute for server to reboot..."
+  sleep 60
+fi
 
 echo "Change SSH port to $sshPort, configure iptables..."
 overcast expose $instance 22 $sshPort

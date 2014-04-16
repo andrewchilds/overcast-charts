@@ -33,20 +33,12 @@
 
 cluster="charts"
 instance="charts.001"
-username="appuser"
-sshPort="50022"
-
-# Local Overcast configuration to be pushed to the new instance.
-overcastConfigPath="$HOME/.overcast"
 
 # List droplet sizes with `overcast digitalocean sizes`
 sizeSlug="512mb"
 
 # List droplet regions with `overcast digitalocean regions`
 regionSlug="nyc2"
-
-# List droplet regions with `overcast digitalocean images`
-imageSlug="ubuntu-12-04-x64"
 
 ###############################################################################
 
@@ -59,29 +51,6 @@ overcast cluster create $cluster
 
 echo "Creating instance \"$instance\" on DigitalOcean..."
 overcast digitalocean create $instance --cluster $cluster --size-slug $sizeSlug \
-  --region-slug $regionSlug --image-slug $imageSlug
+  --region-slug $regionSlug --image-slug "ubuntu-12-04-x64"
 
-echo "Install dependencies..."
-overcast run $instance harden_ssh
-overcast run $instance install/core install/redis install/nodejs
-overcast run $instance "npm -g install grunt-cli bower forever overcast"
-overcast digitalocean reboot $instance
-
-echo "Change SSH port to $sshPort, configure iptables..."
-overcast expose $instance 22 $sshPort
-overcast port $instance $sshPort
-overcast expose $instance 3000 $sshPort
-
-echo "Switching to user \"$username\" instead of root..."
-overcast run $instance add_user --env "username=$username"
-overcast instance update $instance --user $username
-
-echo "Pushing your overcast config ($overcastConfigPath) to the server..."
-overcast push $instance $overcastConfigPath .overcast
-
-echo "Installing application..."
-overcast run $instance $dirName/bin/install
-overcast run $instance $dirName/bin/update
-
-echo "Done!"
-echo "Your new Overcast Charts instance is ready to go at http://`overcast instance get $instance ip`. Enjoy!"
+$dirName/deploy-to-existing-ubuntu $instance
