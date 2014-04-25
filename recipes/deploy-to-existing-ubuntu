@@ -42,19 +42,13 @@ overcastConfigPath="$HOME/.overcast"
 
 dirName=$(dirname "$0")
 
-echo "Install dependencies..."
+echo "Disallowing password access through SSH..."
 overcast run $instance harden_ssh
+
+echo "Full system upgrade, installing core packages..."
 overcast run $instance install/core install/redis install/nodejs
 overcast run $instance "npm -g install grunt-cli bower forever overcast"
-
-if [ -n "`overcast instance get $instance digitalocean`" ]; then
-  overcast digitalocean reboot $instance
-else
-  echo "Rebooting server..."
-  overcast run $instance reboot
-  echo "Waiting 1 minute for server to reboot..."
-  sleep 60
-fi
+overcast reboot $instance
 
 echo "Change SSH port to $sshPort, configure iptables..."
 overcast expose $instance 22 $sshPort
